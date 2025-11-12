@@ -200,7 +200,7 @@ async function createProject(config: ProjectConfig) {
     console.log(chalk.cyan(`  cd ${config.name}`));
     console.log(chalk.cyan('  npm run dev\n'));
 
-    console.log(chalk.gray('Documentation: https://docs.x402.network'));
+    console.log(chalk.gray('Documentation: https://collinsville22.github.io/x402-upl'));
     console.log(chalk.gray('GitHub: https://github.com/x402-upl/x402\n'));
   } catch (error) {
     spinner.fail('Project creation failed');

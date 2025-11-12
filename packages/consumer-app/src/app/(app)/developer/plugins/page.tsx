@@ -15,7 +15,7 @@ const plugins = [
     downloads: 1240,
     rating: 4.8,
     category: 'cms',
-    docs: 'https://docs.x402.network/plugins/wordpress',
+    docs: 'https://collinsville22.github.io/x402-upl/plugins/wordpress',
     install: 'composer require x402-upl/wordpress-plugin',
   },
   {
@@ -27,7 +27,7 @@ const plugins = [
     downloads: 3450,
     rating: 4.9,
     category: 'ecommerce',
-    docs: 'https://docs.x402.network/plugins/shopify',
+    docs: 'https://collinsville22.github.io/x402-upl/plugins/shopify',
     install: 'Via Shopify App Store',
   },
   {
@@ -39,7 +39,7 @@ const plugins = [
     downloads: 2890,
     rating: 4.7,
     category: 'ecommerce',
-    docs: 'https://docs.x402.network/plugins/woocommerce',
+    docs: 'https://collinsville22.github.io/x402-upl/plugins/woocommerce',
     install: 'composer require x402-upl/woocommerce',
   },
   {
@@ -51,7 +51,7 @@ const plugins = [
     downloads: 580,
     rating: 4.5,
     category: 'ai',
-    docs: 'https://docs.x402.network/plugins/eliza',
+    docs: 'https://collinsville22.github.io/x402-upl/plugins/eliza',
     install: 'npm install @x402-upl/eliza-plugin',
   },
 ];
@@ -230,7 +230,7 @@ export default function PluginsPage() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => window.open('https://docs.x402.network/plugins', '_blank')}
+              onClick={() => window.open('https://collinsville22.github.io/x402-upl/plugins', '_blank')}
             >
               Read Plugin Docs
             </Button>

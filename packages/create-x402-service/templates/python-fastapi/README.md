@@ -280,6 +280,6 @@ logger.error(f"Error: {e}")
 
 ## Support
 
-- Documentation: https://docs.x402.network
+- Documentation: https://collinsville22.github.io/x402-upl
 - Registry: https://registry.x402.network
 - Issues: https://github.com/x402-upl/issues

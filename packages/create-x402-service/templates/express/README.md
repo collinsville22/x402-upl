@@ -164,7 +164,7 @@ curl http://localhost:3000/health
 
 ## Support
 
-- Documentation: https://docs.x402.network
+- Documentation: https://collinsville22.github.io/x402-upl
 - GitHub: https://github.com/x402-upl/x402
 
 ## License

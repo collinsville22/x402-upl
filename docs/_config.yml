@@ -1,0 +1,7 @@
+theme: jekyll-theme-cayman
+title: X402 Universal Payment Layer
+description: Solana-based payment infrastructure for AI agents and autonomous services
+show_downloads: true
+github:
+  repository_url: https://github.com/collinsville22/x402-upl
+  is_project_page: true
