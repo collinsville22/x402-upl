@@ -41,13 +41,14 @@ Thumbs.db
 !postcss.config.js
 !tailwind.config.js
 
-# Documentation - only keep root docs
+# Documentation - only keep root docs and docs/ folder
 *.md
 !README.md
 !ARCHITECTURE.md
 !SETUP.md
 !LICENSE
 !**/README.md
+!docs/*.md
 
 # Testing
 coverage
