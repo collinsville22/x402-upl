@@ -1,11 +1,59 @@
+# Dependencies
 node_modules
-dist
-.env
-*.log
-.DS_Store
+**/node_modules
 
+# Build outputs
+dist
+.next
+.turbo
+build
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Compiled files
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+!*.config.js
+!jest.config.js
+!next.config.js
+!postcss.config.js
+!tailwind.config.js
+
+# Documentation - only keep root docs
 *.md
 !README.md
 !ARCHITECTURE.md
 !SETUP.md
+!LICENSE
 !**/README.md
+
+# Testing
+coverage
+.nyc_output
+
+# Temporary
+.cache
+tmp
+temp
