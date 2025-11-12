@@ -166,4 +166,6 @@ const result = await client.payAndFetch(services[0].url, params);
 
 ## License
 
-Proprietary - x402 Universal Payment Layer
+Apache License 2.0 - See [LICENSE](./LICENSE) for details.
+
+This project is fully open source and available for commercial and non-commercial use under the Apache License 2.0.

@@ -296,4 +296,4 @@ export async function POST(request: NextRequest) {
 
 ## License
 
-Proprietary - x402 Universal Payment Layer
+Apache License 2.0
