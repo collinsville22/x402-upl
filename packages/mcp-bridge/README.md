@@ -258,20 +258,6 @@ Check wallet balance before/after:
 
 ---
 
-## Bounty Alignment
-
-### MCP Server Track ($10k)
-
-✅ Official MCP SDK integration
-✅ x402 protocol implementation
-✅ Automatic payment handling
-✅ Bazaar discovery integration
-✅ Claude Desktop ready
-✅ Production error handling
-✅ Complete documentation
-
----
-
 ## Next Steps
 
 1. **Deploy Services**: Create x402-enabled APIs for Claude to use
