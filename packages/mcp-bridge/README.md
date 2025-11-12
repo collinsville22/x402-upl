@@ -1,272 +1,234 @@
-# x402 MCP Server - CORRECT IMPLEMENTATION
+# X402 MCP Server
 
-Production MCP server with x402 payment protocol integration for Claude.
+Model Context Protocol (MCP) server enabling Claude Desktop to discover and interact with x402 payment-gated services on Solana.
 
----
+## Overview
 
-## What This Does
+This MCP server bridges Claude Desktop with the x402 ecosystem, allowing Claude to autonomously discover services, handle micropayments, and chain multiple API calls together. All payment processing happens transparently through the x402 protocol.
 
-Exposes x402-enabled services as MCP tools for Claude Desktop. Claude can:
-- Discover paid services from Bazaar
-- Automatically pay for API calls in USDC
-- Chain multiple paid services together
-- All payments handled transparently
+## Features
 
----
-
-## Changes from Old Implementation
-
-### ❌ Old (Wrong)
-```typescript
-private async createPayment(requirements: any): Promise<string> {
-  throw new Error('Payment creation must be handled by MCP client');
-}
-```
-
-### ✅ New (Correct)
-```typescript
-this.httpClient = withPaymentInterceptor(axios.create(), walletClient, {
-  facilitatorUrl: config.facilitatorUrl,
-});
-```
-
-**Result**: Automatic payment handling via x402-axios
-
----
+- **Service Discovery**: Automatic discovery of x402-enabled services from the registry
+- **Payment Automation**: Transparent handling of HTTP 402 Payment Required responses
+- **Solana Integration**: Native SOL, USDC, and CASH token support
+- **MCP Protocol**: Full compliance with Model Context Protocol specification
+- **Tool Exposure**: Each discovered service becomes an available tool for Claude
+- **Real-time Updates**: Periodic refresh of available services
 
 ## Architecture
 
 ```
-┌─────────────────┐
-│  Claude Desktop │
-└────────┬────────┘
-         │ MCP Protocol
-         ▼
-┌─────────────────┐
-│ x402 MCP Server │
-│ - x402-axios    │
-│ - Wallet signer │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌─────────┐ ┌─────────────┐
-│ Bazaar  │ │ x402        │
-│ API     │ │ Services    │
-└─────────┘ │ (402 APIs)  │
-            └─────────────┘
+Claude Desktop
+      │
+      │ MCP Protocol
+      ▼
+X402 MCP Server
+├── Service Discovery
+├── Payment Handler
+└── Tool Registry
+      │
+      │ HTTP 402
+      ▼
+X402 Services (Solana)
 ```
 
----
-
-## Setup
-
-### 1. Environment Variables
+## Installation
 
 ```bash
-PRIVATE_KEY=0xYourPrivateKey
-NETWORK=base-sepolia
-FACILITATOR_URL=https://x402.org/facilitator
-BAZAAR_URL=https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources
+npm install
+npm run build
 ```
 
-### 2. Claude Desktop Configuration
+## Configuration
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+### Environment Variables
+
+Create a `.env` file or set the following:
+
+```bash
+# Solana wallet private key (base58 encoded)
+WALLET_PRIVATE_KEY=your_solana_private_key
+
+# Network configuration
+SOLANA_NETWORK=devnet
+SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# X402 Registry URL
+X402_REGISTRY_URL=https://registry.x402.network
+
+# Optional: Service refresh interval in seconds (default: 60)
+REFRESH_INTERVAL=60
+```
+
+### Claude Desktop Setup
+
+Add to your Claude Desktop configuration file:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
-    "x402-services": {
+    "x402": {
       "command": "node",
-      "args": ["dist/server-correct.js"],
+      "args": ["dist/solana-mcp-server.js"],
       "cwd": "/path/to/x402-upl/packages/mcp-bridge",
       "env": {
-        "PRIVATE_KEY": "0xYourPrivateKey",
-        "NETWORK": "base-sepolia",
-        "FACILITATOR_URL": "https://x402.org/facilitator"
+        "WALLET_PRIVATE_KEY": "your_private_key_here",
+        "SOLANA_NETWORK": "devnet",
+        "X402_REGISTRY_URL": "https://registry.x402.network"
       }
     }
   }
 }
 ```
 
-### 3. Build & Run
+## Usage
+
+### Starting the Server
 
 ```bash
-npm install
-npm run build
+# Development mode with auto-reload
+npm run dev
+
+# Production mode
 npm start
 ```
 
----
+### Available Commands
 
-## How It Works
+The server exposes all discovered x402 services as MCP tools. Example tools:
 
-### Tool Discovery
+- Price oracle queries
+- Data analysis services
+- AI inference endpoints
+- Custom API integrations
 
-1. **Server starts** → Fetches services from Bazaar API
-2. **Services cached** → Map of all available x402 services
-3. **Tools exposed** → Each service becomes an MCP tool
-4. **Auto-refresh** → Updates every 60 seconds
+### Example Interaction
 
-### Tool Execution
+**User to Claude**: "Get the current SOL price"
 
-**Claude**: "Get weather data"
+**Claude**:
+1. Discovers price oracle service from registry
+2. Invokes tool with required parameters
+3. Server handles payment automatically
+4. Returns price data to Claude
+5. Claude responds to user
 
-**MCP Server**:
-1. Identifies weather service tool
-2. Calls service URL with x402-axios
-3. x402-axios detects 402 response
-4. Automatically signs payment
-5. Retries with X-PAYMENT header
-6. Returns data to Claude
+## Payment Flow
 
-**Claude**: Receives weather data (payment transparent)
+1. **Service Request**: Claude calls an x402 tool
+2. **402 Response**: Service returns payment requirements
+3. **Payment Execution**: Server creates and signs Solana transaction
+4. **Retry with Proof**: Request retried with payment proof header
+5. **Service Response**: Data returned to Claude
 
----
+## Tool Schema
 
-## Example Tools
+Each x402 service is exposed as an MCP tool with:
 
-After connecting to Bazaar, Claude sees tools like:
+```typescript
+{
+  name: string;          // Unique tool identifier
+  description: string;   // Service description
+  inputSchema: object;   // JSON Schema for parameters
+  metadata: {
+    pricePerCall: number;
+    acceptedTokens: string[];
+    category: string;
+  }
+}
+```
+
+## Development
+
+### Project Structure
 
 ```
-🔧 api_example_com_weather
-   Get current weather data
-   Cost: $0.001000
-   Network: base-sepolia
-   Method: GET
-
-🔧 api_service_io_sentiment
-   Analyze text sentiment
-   Cost: $0.002000
-   Network: base-sepolia
-   Method: POST
+packages/mcp-bridge/
+├── src/
+│   └── solana-mcp-server.ts    # Main server implementation
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
----
-
-## Usage in Claude
-
-**User**: "What's the weather in NYC and what's the sentiment of 'AI is awesome'?"
-
-**Claude** (automatically):
-1. Calls `api_example_com_weather` → Pays $0.001
-2. Calls `api_service_io_sentiment` → Pays $0.002
-3. Aggregates results
-4. Responds to user
-
-**Total spend**: $0.003 in USDC
-
----
-
-## Key Features
-
-### Automatic Payment Handling
-
-x402-axios intercept handles:
-- 402 detection
-- EIP-3009 signature generation
-- X-PAYMENT header construction
-- Request retry with payment
-- Transaction confirmation
-
-### Bazaar Integration
-
-Real-time service discovery:
-- Fetches from CDP Bazaar API
-- Updates every 60 seconds
-- Exposes all available services
-- Includes pricing, network, schemas
-
-### Production Ready
-
-- Error handling for failed payments
-- Service unavailability handling
-- Wallet balance validation
-- Transaction retry logic
-- Comprehensive logging
-
----
-
-## Comparison with Old Implementation
-
-| Feature | Old | New |
-|---------|-----|-----|
-| Payment handling | Throws error | Automatic via x402-axios |
-| Service discovery | Custom registry | Official Bazaar API |
-| 402 detection | Manual | Automatic interceptor |
-| Facilitator | None | x402.org or CDP |
-| Signatures | None | EIP-3009 |
-| Working | No | Yes |
-
----
-
-## Testing
-
-### 1. Test Service Discovery
+### Building
 
 ```bash
-npm run dev
+npm run build
 ```
 
-Check logs for:
-```
-Refreshed X services from Bazaar
-x402 MCP Server started
-Wallet: 0xYourAddress
-Network: base-sepolia
-```
+### Testing
 
-### 2. Test with Claude
-
-Ask Claude:
-- "List available paid services"
-- "Use the weather service to get data for NYC"
-- "What tools do you have access to?"
-
-### 3. Verify Payments
-
-Check wallet balance before/after:
 ```bash
-# Balance should decrease by service costs
+npm test
 ```
 
----
+### Linting
+
+```bash
+npm run lint
+```
 
 ## Troubleshooting
 
-### No tools showing in Claude
+### Server Not Starting
 
-- Check Bazaar URL is accessible
-- Verify services are publishing to Bazaar
-- Check server logs for refresh errors
+- Verify wallet private key is valid base58 format
+- Check Solana RPC URL is accessible
+- Ensure registry URL returns services
 
-### Payment failures
+### Tools Not Appearing in Claude
 
-- Verify wallet has USDC
-- Check private key is correct
-- Ensure network matches (base-sepolia vs base)
-- Verify facilitator URL
-
-### Claude can't call tools
-
-- Check Claude config JSON is valid
-- Restart Claude Desktop after config changes
-- Verify MCP server is running
+- Restart Claude Desktop after configuration changes
 - Check server logs for errors
+- Verify MCP server process is running
+- Confirm configuration file path is correct
 
----
+### Payment Failures
 
-## Next Steps
+- Ensure wallet has sufficient balance (SOL for gas + payment tokens)
+- Verify correct network (devnet vs mainnet-beta)
+- Check transaction signatures on Solana explorer
+- Confirm service payment addresses are valid
 
-1. **Deploy Services**: Create x402-enabled APIs for Claude to use
-2. **Test Workflows**: Multi-step agent tasks with payments
-3. **Monitor Usage**: Track payments and service calls
-4. **Optimize Costs**: Cache results, batch requests
+### Service Discovery Issues
 
----
+- Verify registry URL is accessible
+- Check network connectivity
+- Review server logs for API errors
+- Confirm services are registered in the x402 registry
+
+## Security Considerations
+
+- **Private Keys**: Never commit private keys to version control
+- **Wallet Security**: Use dedicated wallets with limited funds for testing
+- **Network Selection**: Use devnet for development and testing
+- **Service Validation**: Server validates service metadata before exposing tools
+- **Payment Limits**: Consider implementing spending limits for production use
+
+## Integration with X402 Ecosystem
+
+This MCP server integrates with:
+
+- **X402 Registry**: Service discovery and metadata
+- **X402 Core**: Payment protocol implementation
+- **Solana Blockchain**: Transaction execution and verification
+- **X402 SDKs**: Compatible with all x402 client implementations
+
+## Contributing
+
+This package is part of the x402-upl monorepo. See the root README for contribution guidelines.
 
 ## License
 
 MIT
+
+## Support
+
+For issues and questions:
+- GitHub Issues: https://github.com/collinsville22/x402-upl/issues
+- Documentation: See root ARCHITECTURE.md and SETUP.md
