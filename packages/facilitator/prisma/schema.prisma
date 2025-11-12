@@ -1,0 +1,196 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Transaction {
+  id                   String    @id @default(cuid())
+  signature            String    @unique
+  amount               String
+  token                String
+  senderAddress        String
+  recipientAddress     String
+  serviceId            String?
+  agentId              String?
+  status               String    @default("pending")
+  timestamp            DateTime  @default(now())
+  confirmedAt          DateTime?
+  settledAt            DateTime?
+  settlementId         String?
+  settlementSignature  String?
+  metadata             Json?
+
+  settlement           Settlement? @relation(fields: [settlementId], references: [id])
+
+  @@index([recipientAddress, status, settledAt])
+  @@index([serviceId, status])
+  @@index([signature])
+  @@index([timestamp])
+}
+
+model Settlement {
+  id                    String        @id @default(cuid())
+  merchantWallet        String
+  serviceId             String
+  totalAmount           String
+  platformFee           String
+  merchantAmount        String
+  transactionCount      Int
+  status                String        @default("pending")
+  settlementType        String
+  transactionSignature  String?
+  cancelReason          String?
+  errorMessage          String?
+  requestedAt           DateTime      @default(now())
+  completedAt           DateTime?
+
+  transactions          Transaction[]
+
+  @@index([merchantWallet, status])
+  @@index([serviceId])
+  @@index([status, requestedAt])
+}
+
+model Service {
+  id                    String          @id @default(cuid())
+  wallet                String          @unique
+  name                  String
+  url                   String
+  description           String?
+  category              String?
+  pricePerCall          String
+  acceptedTokens        String[]
+  settlementFrequency   String          @default("manual")
+  minimumSettlement     String          @default("0")
+  autoSettlement        Boolean         @default(false)
+  lastSettlementAt      DateTime?
+  webhookUrl            String?
+  webhookSecret         String?
+  merchantWallet        String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  ratings               ServiceRating[]
+
+  @@index([wallet])
+  @@index([category])
+  @@index([merchantWallet])
+}
+
+model Agent {
+  id                    String    @id @default(cuid())
+  wallet                String    @unique
+  did                   String?
+  reputationScore       Int       @default(5000)
+  totalSpent            String    @default("0")
+  totalTransactions     Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([wallet])
+  @@index([reputationScore])
+}
+
+model WebhookDelivery {
+  id                    String    @id @default(cuid())
+  webhookUrl            String
+  eventType             String
+  payload               Json
+  status                String    @default("pending")
+  attempts              Int       @default(0)
+  maxAttempts           Int       @default(3)
+  lastAttemptAt         DateTime?
+  nextRetryAt           DateTime?
+  completedAt           DateTime?
+  error                 String?
+  createdAt             DateTime  @default(now())
+
+  @@index([status, nextRetryAt])
+  @@index([webhookUrl])
+  @@index([eventType])
+}
+
+model SettlementSchedule {
+  id                    String    @id @default(cuid())
+  serviceId             String
+  merchantWallet        String
+  cronExpression        String
+  minimumAmount         String    @default("100")
+  enabled               Boolean   @default(true)
+  lastExecutedAt        DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([serviceId, merchantWallet])
+  @@index([serviceId])
+  @@index([merchantWallet])
+  @@index([enabled])
+}
+
+model ApiKey {
+  id                    String    @id @default(cuid())
+  merchantWallet        String
+  name                  String
+  keyHash               String    @unique
+  keyPrefix             String
+  permissions           String[]  @default(["read"])
+  lastUsedAt            DateTime?
+  expiresAt             DateTime?
+  revoked               Boolean   @default(false)
+  revokedAt             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([merchantWallet])
+  @@index([keyHash])
+  @@index([keyPrefix])
+}
+
+model ServiceRating {
+  id                    String    @id @default(cuid())
+  serviceId             String
+  agentId               String
+  rating                Int
+  comment               String?
+  helpful               Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  service               Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, agentId])
+  @@index([serviceId])
+  @@index([agentId])
+  @@index([rating])
+}
+
+model WebhookConfig {
+  id                    String    @id @default(cuid())
+  merchantWallet        String
+  webhookUrl            String
+  webhookSecret         String
+  events                String[]  @default(["settlement.completed", "settlement.failed"])
+  enabled               Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([merchantWallet])
+  @@index([enabled])
+}
+
+model NotificationPreference {
+  id                        String    @id @default(cuid())
+  merchantWallet            String    @unique
+  emailSettlements          Boolean   @default(true)
+  emailFailedTransactions   Boolean   @default(true)
+  emailWeeklySummary        Boolean   @default(false)
+  webhookEnabled            Boolean   @default(false)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@index([merchantWallet])
+}

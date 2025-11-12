@@ -1,0 +1,63 @@
+[package]
+name = "x402-upl"
+version = "2.0.0"
+edition = "2021"
+authors = ["x402-upl Team <dev@x402.network>"]
+description = "Solana x402 SDK - Autonomous payments for AI agents and services"
+license = "Apache-2.0"
+repository = "https://github.com/x402-upl/x402-upl"
+homepage = "https://x402.network"
+documentation = "https://docs.rs/x402-upl"
+keywords = ["x402", "solana", "payments", "ai-agents", "micropayments"]
+categories = ["web-programming::http-client", "cryptography::cryptocurrencies"]
+readme = "README.md"
+
+[dependencies]
+# Solana
+solana-client = "1.18"
+solana-sdk = "1.18"
+spl-token = "4.0"
+spl-associated-token-account = "2.3"
+
+# HTTP
+reqwest = { version = "0.11", features = ["json"] }
+http = "0.2"
+
+# Async
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+base64 = "0.21"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+bs58 = "0.5"
+hex = "0.4"
+rand = "0.8"
+lazy_static = "1.4"
+
+# Cryptography (for TAP)
+ed25519-dalek = "2.1"
+url = "2.5"
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockito = "1.2"
+
+[lib]
+name = "x402_upl"
+path = "src/lib.rs"
+
+[[example]]
+name = "simple_agent"
+path = "examples/simple_agent.rs"
+
+[[example]]
+name = "ai_inference"
+path = "examples/ai_inference.rs"

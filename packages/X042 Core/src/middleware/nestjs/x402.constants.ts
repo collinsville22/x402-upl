@@ -1,0 +1,2 @@
+export const X402_MODULE_OPTIONS = 'X402_MODULE_OPTIONS';
+export const X402_PAYMENT_METADATA = 'x402:payment';

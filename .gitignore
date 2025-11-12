@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+*.log
+.DS_Store
+
+*.md
+!README.md
+!ARCHITECTURE.md
+!SETUP.md
+!**/README.md

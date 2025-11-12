@@ -1,0 +1,80 @@
+.wrap .notice-info {
+    margin: 20px 0;
+    padding: 15px;
+}
+
+.wrap .notice-info p {
+    margin: 5px 0;
+}
+
+.x402-payment-info {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+}
+
+.x402-payment-info h2 {
+    margin-top: 0;
+}
+
+.x402-payment-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.x402-payment-info li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.x402-payment-info li:last-child {
+    border-bottom: none;
+}
+
+.x402-payment-fields {
+    margin: 15px 0;
+}
+
+.x402-payment-fields label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.x402-payment-fields select {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.x402-info {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.status-pending {
+    color: #f0ad4e;
+    font-weight: 600;
+}
+
+.status-completed {
+    color: #5cb85c;
+    font-weight: 600;
+}
+
+.status-failed {
+    color: #d9534f;
+    font-weight: 600;
+}
+
+table.wp-list-table td a {
+    text-decoration: none;
+}
+
+table.wp-list-table td a:hover {
+    text-decoration: underline;
+}

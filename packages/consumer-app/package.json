@@ -1,0 +1,32 @@
+{
+  "name": "@x402-upl/consumer-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.5.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "@tanstack/react-query": "^5.62.11",
+    "zustand": "^5.0.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "@solana/web3.js": "^1.98.0",
+    "recharts": "^2.15.0",
+    "framer-motion": "^11.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8",
+    "autoprefixer": "^10.4.20"
+  }
+}

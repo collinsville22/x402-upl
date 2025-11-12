@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "packages/registry/api/src/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["packages/registry/api/prisma/schema.prisma"]
+      }
+    },
+    {
+      "src": "packages/dashboard/frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "packages/registry/api/src/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "packages/dashboard/frontend/$1"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "DIRECT_DATABASE_URL": "@direct-database-url",
+    "UPSTASH_REDIS_REST_URL": "@upstash-redis-url",
+    "UPSTASH_REDIS_REST_TOKEN": "@upstash-redis-token",
+    "SOLANA_RPC_URL": "@solana-rpc-url",
+    "TREASURY_WALLET": "@treasury-wallet",
+    "CDP_API_KEY_NAME": "@cdp-api-key-name",
+    "CDP_API_KEY_PRIVATE_KEY": "@cdp-api-private-key"
+  },
+  "installCommand": "npm install && npx prisma generate",
+  "buildCommand": "npm run build"
+}

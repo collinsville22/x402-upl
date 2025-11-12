@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-x402-border;
+  }
+
+  body {
+    @apply bg-x402-black text-x402-text-primary antialiased;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-x402-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-x402-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-x402-text-muted;
+  }
+}
+
+@layer components {
+  /* Button Variants */
+  .btn-primary {
+    @apply rounded-lg bg-x402-accent px-6 py-3 font-semibold text-x402-black transition-all hover:bg-x402-accent-hover focus:outline-none focus:ring-2 focus:ring-x402-accent focus:ring-offset-2 focus:ring-offset-x402-black disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply rounded-lg border border-x402-border bg-x402-surface px-6 py-3 font-semibold text-x402-text-primary transition-all hover:bg-x402-surface-hover focus:outline-none focus:ring-2 focus:ring-x402-accent focus:ring-offset-2 focus:ring-offset-x402-black disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply rounded-lg px-6 py-3 font-semibold text-x402-text-secondary transition-all hover:bg-x402-surface-hover hover:text-x402-text-primary focus:outline-none focus:ring-2 focus:ring-x402-accent focus:ring-offset-2 focus:ring-offset-x402-black disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Card Variants */
+  .card {
+    @apply rounded-lg border border-x402-border bg-x402-surface;
+  }
+
+  .card-hover {
+    @apply card transition-all hover:border-x402-accent/30 hover:bg-x402-surface-hover;
+  }
+
+  .card-accent {
+    @apply rounded-lg border border-x402-accent/20 bg-x402-accent-muted;
+  }
+
+  /* Input Styles */
+  .input {
+    @apply w-full rounded-lg border border-x402-border bg-x402-surface px-4 py-3 text-x402-text-primary placeholder-x402-text-muted transition-colors focus:border-x402-accent focus:outline-none focus:ring-1 focus:ring-x402-accent disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .textarea {
+    @apply input min-h-[120px] resize-y font-mono text-sm;
+  }
+
+  /* Status Badges */
+  .badge {
+    @apply inline-flex items-center rounded-lg px-3 py-1 text-xs font-semibold;
+  }
+
+  .badge-success {
+    @apply badge border border-x402-success/20 bg-x402-success/10 text-x402-success;
+  }
+
+  .badge-warning {
+    @apply badge border border-x402-warning/20 bg-x402-warning/10 text-x402-warning;
+  }
+
+  .badge-error {
+    @apply badge border border-x402-error/20 bg-x402-error/10 text-x402-error;
+  }
+
+  .badge-info {
+    @apply badge border border-x402-info/20 bg-x402-info/10 text-x402-info;
+  }
+
+  .badge-neutral {
+    @apply badge border border-x402-border bg-x402-surface text-x402-text-secondary;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply h-12 w-12 animate-spin rounded-full border-4 border-x402-border border-t-x402-accent;
+  }
+}

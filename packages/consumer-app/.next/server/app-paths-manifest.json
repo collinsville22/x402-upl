@@ -1,0 +1,9 @@
+{
+  "/(app)/integrations/page": "app/(app)/integrations/page.js",
+  "/(app)/workflows/page": "app/(app)/workflows/page.js",
+  "/(app)/escrow/page": "app/(app)/escrow/page.js",
+  "/(app)/workflows/new/page": "app/(app)/workflows/new/page.js",
+  "/(app)/analytics/page": "app/(app)/analytics/page.js",
+  "/(app)/developer/sandbox/page": "app/(app)/developer/sandbox/page.js",
+  "/(app)/developer/plugins/page": "app/(app)/developer/plugins/page.js"
+}

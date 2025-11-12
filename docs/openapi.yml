@@ -1,0 +1,380 @@
+openapi: 3.0.3
+info:
+  title: x402 Universal Payment Layer API
+  description: Production API for x402 cryptocurrency payments on Solana
+  version: 2.0.0
+  contact:
+    name: x402-upl Team
+    email: dev@x402.network
+    url: https://x402.network
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://registry.x402.network
+    description: Production Registry
+  - url: https://facilitator.payai.network
+    description: Production Facilitator
+  - url: http://localhost:3001
+    description: Local Development Registry
+  - url: http://localhost:4001
+    description: Local Development Facilitator
+
+tags:
+  - name: Services
+    description: Service discovery and registration
+  - name: Payments
+    description: Payment processing and verification
+  - name: Health
+    description: System health and status
+
+paths:
+  /services/discover:
+    get:
+      tags:
+        - Services
+      summary: Discover x402 services
+      description: Search for available x402-enabled services with optional filters
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Service category
+          schema:
+            type: string
+        - name: maxPrice
+          in: query
+          description: Maximum price in SOL
+          schema:
+            type: number
+        - name: minReputation
+          in: query
+          description: Minimum reputation score (0-1)
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1
+        - name: minUptime
+          in: query
+          description: Minimum uptime percentage (0-1)
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1
+        - name: limit
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: List of matching services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Server error
+
+  /services/{serviceId}:
+    get:
+      tags:
+        - Services
+      summary: Get service details
+      description: Retrieve detailed information about a specific service
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          description: Service identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '404':
+          description: Service not found
+        '500':
+          description: Server error
+
+  /services/register:
+    post:
+      tags:
+        - Services
+      summary: Register a new service
+      description: Register a new x402-enabled service in the registry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRegistration'
+      responses:
+        '201':
+          description: Service registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid service data
+        '409':
+          description: Service already exists
+        '500':
+          description: Server error
+
+  /payments/verify:
+    post:
+      tags:
+        - Payments
+      summary: Verify payment transaction
+      description: Verify a Solana payment transaction on-chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentVerification'
+      responses:
+        '200':
+          description: Payment verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentVerificationResult'
+        '400':
+          description: Invalid payment data
+        '500':
+          description: Server error
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check system health status
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: 2.0.0
+
+components:
+  schemas:
+    Service:
+      type: object
+      required:
+        - id
+        - name
+        - resource
+        - category
+      properties:
+        id:
+          type: string
+          example: svc_abc123
+        name:
+          type: string
+          example: AI Inference Service
+        description:
+          type: string
+          example: High-performance AI inference with Llama models
+        resource:
+          type: string
+          format: uri
+          example: https://api.example.com/inference
+        category:
+          type: string
+          example: AI & ML
+        pricing:
+          $ref: '#/components/schemas/Pricing'
+        reputation:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.95
+        uptime:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.999
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Pricing:
+      type: object
+      required:
+        - amount
+        - asset
+      properties:
+        amount:
+          type: string
+          example: "0.001"
+        asset:
+          type: string
+          enum: [SOL, USDC, CASH]
+          example: SOL
+
+    ServiceRegistration:
+      type: object
+      required:
+        - name
+        - resource
+        - category
+        - wallet
+      properties:
+        name:
+          type: string
+          example: My AI Service
+        description:
+          type: string
+          example: AI service description
+        resource:
+          type: string
+          format: uri
+          example: https://api.myservice.com
+        category:
+          type: string
+          example: AI & ML
+        wallet:
+          type: string
+          example: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+        pricing:
+          $ref: '#/components/schemas/Pricing'
+        metadata:
+          type: object
+          additionalProperties: true
+
+    PaymentRequirements:
+      type: object
+      required:
+        - scheme
+        - network
+        - asset
+        - payTo
+        - amount
+        - timeout
+      properties:
+        scheme:
+          type: string
+          enum: [solana]
+          example: solana
+        network:
+          type: string
+          enum: [mainnet-beta, devnet, testnet]
+          example: devnet
+        asset:
+          type: string
+          enum: [SOL, USDC, CASH]
+          example: SOL
+        payTo:
+          type: string
+          example: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+        amount:
+          type: string
+          example: "0.001"
+        timeout:
+          type: integer
+          example: 60
+        metadata:
+          type: string
+          nullable: true
+
+    PaymentPayload:
+      type: object
+      required:
+        - signature
+        - amount
+        - from
+        - to
+        - asset
+        - network
+        - timestamp
+      properties:
+        signature:
+          type: string
+          example: 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW
+        amount:
+          type: string
+          example: "0.001"
+        from:
+          type: string
+          example: 8xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsV
+        to:
+          type: string
+          example: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+        asset:
+          type: string
+          enum: [SOL, USDC, CASH]
+          example: SOL
+        network:
+          type: string
+          enum: [mainnet-beta, devnet, testnet]
+          example: devnet
+        timestamp:
+          type: string
+          format: date-time
+
+    PaymentVerification:
+      type: object
+      required:
+        - signature
+        - expectedAmount
+      properties:
+        signature:
+          type: string
+          example: 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW
+        expectedAmount:
+          type: number
+          example: 0.001
+
+    PaymentVerificationResult:
+      type: object
+      required:
+        - verified
+      properties:
+        verified:
+          type: boolean
+          example: true
+        transaction:
+          type: object
+          properties:
+            signature:
+              type: string
+            amount:
+              type: number
+            from:
+              type: string
+            to:
+              type: string
+            timestamp:
+              type: string
+              format: date-time

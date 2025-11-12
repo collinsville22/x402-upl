@@ -1,0 +1,215 @@
+version: '3.8'
+
+services:
+  registry-api:
+    build:
+      context: .
+      dockerfile: packages/registry/api/Dockerfile
+    container_name: x402-registry-api
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://x402:x402_password@postgres:5432/x402}
+      - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
+      - REDIS_URL=redis://redis:6379
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      - SOLANA_NETWORK=${SOLANA_NETWORK:-devnet}
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  indexer:
+    build:
+      context: .
+      dockerfile: packages/registry/indexer/Dockerfile
+    container_name: x402-indexer
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://x402:x402_password@postgres:5432/x402}
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      - SOLANA_NETWORK=${SOLANA_NETWORK:-devnet}
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - registry-api
+    networks:
+      - x402-network
+
+  facilitator:
+    build:
+      context: packages/facilitator
+      dockerfile: Dockerfile
+    container_name: x402-facilitator
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - DATABASE_URL=${DATABASE_URL:-postgresql://x402:x402_password@postgres:5432/x402}
+      - REDIS_URL=redis://redis:6379
+      - REGISTRY_URL=http://registry-api:3001
+      - SOLANA_NETWORK=${SOLANA_NETWORK:-devnet}
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - registry-api
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: packages/mcp-bridge/Dockerfile
+    container_name: x402-mcp-server
+    ports:
+      - "3002:3002"
+    environment:
+      - REGISTRY_API_URL=http://registry-api:3001
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - registry-api
+    networks:
+      - x402-network
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: packages/dashboard/frontend/Dockerfile
+    container_name: x402-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_REGISTRY_URL=http://localhost:3001
+      - NEXT_PUBLIC_FACILITATOR_URL=http://localhost:4001
+      - NEXT_PUBLIC_SOLANA_NETWORK=${SOLANA_NETWORK:-devnet}
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - registry-api
+      - facilitator
+    networks:
+      - x402-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: x402-postgres
+    environment:
+      - POSTGRES_USER=x402
+      - POSTGRES_PASSWORD=x402_password
+      - POSTGRES_DB=x402
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U x402"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: x402-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: x402-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - x402-network
+    depends_on:
+      - registry-api
+      - facilitator
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: x402-grafana
+    ports:
+      - "3003:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
+      - GF_SERVER_ROOT_URL=http://localhost:3003
+    volumes:
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - x402-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: x402-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - registry-api
+      - facilitator
+      - dashboard
+    restart: unless-stopped
+    networks:
+      - x402-network
+
+networks:
+  x402-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

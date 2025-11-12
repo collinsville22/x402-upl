@@ -1,0 +1,63 @@
+import { z } from 'zod';
+declare const ConfigSchema: z.ZodObject<{
+    PORT: z.ZodDefault<z.ZodString>;
+    HOST: z.ZodDefault<z.ZodString>;
+    NODE_ENV: z.ZodDefault<z.ZodEnum<["development", "production", "test"]>>;
+    SOLANA_RPC_URL: z.ZodDefault<z.ZodString>;
+    NETWORK: z.ZodDefault<z.ZodEnum<["mainnet-beta", "devnet", "testnet"]>>;
+    REFUND_WALLET_KEYPAIR: z.ZodString;
+    REDIS_URL: z.ZodDefault<z.ZodString>;
+    RATE_LIMIT_MAX: z.ZodDefault<z.ZodString>;
+    RATE_LIMIT_WINDOW: z.ZodDefault<z.ZodString>;
+    LOG_LEVEL: z.ZodDefault<z.ZodEnum<["fatal", "error", "warn", "info", "debug", "trace"]>>;
+    CORS_ORIGIN: z.ZodDefault<z.ZodString>;
+    ENABLE_METRICS: z.ZodDefault<z.ZodString>;
+    ENABLE_REFUNDS: z.ZodDefault<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    PORT: string;
+    NETWORK: "mainnet-beta" | "devnet" | "testnet";
+    REDIS_URL: string;
+    LOG_LEVEL: "error" | "info" | "fatal" | "warn" | "debug" | "trace";
+    SOLANA_RPC_URL: string;
+    HOST: string;
+    NODE_ENV: "test" | "development" | "production";
+    CORS_ORIGIN: string;
+    REFUND_WALLET_KEYPAIR: string;
+    RATE_LIMIT_MAX: string;
+    RATE_LIMIT_WINDOW: string;
+    ENABLE_METRICS: string;
+    ENABLE_REFUNDS: string;
+}, {
+    REFUND_WALLET_KEYPAIR: string;
+    PORT?: string | undefined;
+    NETWORK?: "mainnet-beta" | "devnet" | "testnet" | undefined;
+    REDIS_URL?: string | undefined;
+    LOG_LEVEL?: "error" | "info" | "fatal" | "warn" | "debug" | "trace" | undefined;
+    SOLANA_RPC_URL?: string | undefined;
+    HOST?: string | undefined;
+    NODE_ENV?: "test" | "development" | "production" | undefined;
+    CORS_ORIGIN?: string | undefined;
+    RATE_LIMIT_MAX?: string | undefined;
+    RATE_LIMIT_WINDOW?: string | undefined;
+    ENABLE_METRICS?: string | undefined;
+    ENABLE_REFUNDS?: string | undefined;
+}>;
+export type Config = z.infer<typeof ConfigSchema>;
+export declare function loadConfig(): Config;
+export declare const config: {
+    PORT: string;
+    NETWORK: "mainnet-beta" | "devnet" | "testnet";
+    REDIS_URL: string;
+    LOG_LEVEL: "error" | "info" | "fatal" | "warn" | "debug" | "trace";
+    SOLANA_RPC_URL: string;
+    HOST: string;
+    NODE_ENV: "test" | "development" | "production";
+    CORS_ORIGIN: string;
+    REFUND_WALLET_KEYPAIR: string;
+    RATE_LIMIT_MAX: string;
+    RATE_LIMIT_WINDOW: string;
+    ENABLE_METRICS: string;
+    ENABLE_REFUNDS: string;
+};
+export {};
+//# sourceMappingURL=config.d.ts.map

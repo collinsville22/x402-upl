@@ -1,0 +1,71 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'x402-production'
+    environment: 'production'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'x402-registry-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['registry-api:3001']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'registry-api'
+
+  - job_name: 'x402-facilitator'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['facilitator:4001']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'facilitator'
+
+  - job_name: 'x402-indexer'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['indexer:3003']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'indexer'
+
+  - job_name: 'x402-dashboard'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['dashboard:3000']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'dashboard'
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'postgres'
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'redis'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  []

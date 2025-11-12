@@ -1,0 +1,43 @@
+{
+  "name": "@x402-upl/integration-gradient",
+  "version": "2.0.0",
+  "description": "Production Gradient Parallax integration with autonomous agent framework for x402",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "x402",
+    "gradient",
+    "parallax",
+    "distributed-inference",
+    "autonomous-agents",
+    "p2p-networking",
+    "solana-payments"
+  ],
+  "dependencies": {
+    "@x402-upl/core": "workspace:*",
+    "@x402-upl/sdk": "workspace:*",
+    "@solana/web3.js": "^1.95.8",
+    "@solana/spl-token": "^0.4.9",
+    "zod": "^3.24.1",
+    "ws": "^8.18.0",
+    "ioredis": "^5.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
+    "eslint": "^9.17.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

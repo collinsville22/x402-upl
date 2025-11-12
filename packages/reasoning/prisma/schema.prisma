@@ -1,0 +1,108 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Workflow {
+  id                    String         @id
+  userId                String
+  naturalLanguageInput  String         @db.Text
+
+  classification        String?
+  confidence            Float?
+
+  status                WorkflowStatus @default(PLANNING)
+  currentStep           Int?
+
+  estimatedCost         Float?
+  estimatedTime         Int?
+  totalCost             Float          @default(0)
+  totalTime             Int            @default(0)
+
+  executionPlan         Json?
+  stepResults           Json?
+  intent                Json?
+  error                 Json?
+  metadata              Json?
+
+  createdAt             DateTime       @default(now())
+  startedAt             DateTime?
+  completedAt           DateTime?
+
+  payments              Payment[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  workflowId        String
+  workflow          Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  stepId            String
+  signature         String   @unique
+
+  amount            Float
+  asset             String
+  from              String
+  to                String
+
+  network           String
+  timestamp         DateTime @default(now())
+
+  @@index([workflowId])
+  @@index([signature])
+}
+
+model ServiceMetrics {
+  id                  String   @id @default(cuid())
+  serviceId           String   @unique
+  serviceName         String
+
+  totalCalls          Int      @default(0)
+  successfulCalls     Int      @default(0)
+  failedCalls         Int      @default(0)
+
+  totalRevenue        Float    @default(0)
+  averageResponseTime Int      @default(0)
+
+  lastCalledAt        DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([serviceId])
+}
+
+model UserMetrics {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+
+  totalWorkflows        Int      @default(0)
+  completedWorkflows    Int      @default(0)
+  failedWorkflows       Int      @default(0)
+
+  totalSpent            Float    @default(0)
+  averageWorkflowCost   Float    @default(0)
+
+  lastActiveAt          DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum WorkflowStatus {
+  PLANNING
+  AWAITING_APPROVAL
+  APPROVED
+  EXECUTING
+  COMPLETED
+  FAILED
+  CANCELLED
+  ROLLING_BACK
+}

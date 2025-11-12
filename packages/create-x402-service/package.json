@@ -1,0 +1,29 @@
+{
+  "name": "create-x402-service",
+  "version": "1.0.0",
+  "description": "CLI tool to scaffold production-ready x402 services",
+  "type": "module",
+  "bin": {
+    "create-x402-service": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": ["x402", "scaffold", "cli", "generator"],
+  "dependencies": {
+    "commander": "^11.1.0",
+    "prompts": "^2.4.2",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "fs-extra": "^11.2.0",
+    "validate-npm-package-name": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/prompts": "^2.4.9",
+    "@types/fs-extra": "^11.0.4",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

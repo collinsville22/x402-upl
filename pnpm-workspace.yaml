@@ -1,0 +1,12 @@
+packages:
+  - 'packages/*'
+  - 'packages/registry/*'
+  - 'packages/sdk/*'
+  - 'packages/plugins/*'
+  - 'packages/integrations/*'
+  - 'packages/integrations/*/agent'
+  - 'packages/integrations/*/backend'
+  - 'packages/integrations/*/merchant'
+  - 'packages/integrations/*/cdn-proxy'
+  - 'packages/integrations/*/registry'
+  - 'packages/dashboard/*'

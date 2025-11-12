@@ -1,0 +1,40 @@
+{
+  "name": "@x402-upl/core",
+  "version": "2.0.0",
+  "description": "Solana-compatible x402 payment middleware for Express and Fastify",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "test": "vitest"
+  },
+  "keywords": [
+    "x402",
+    "solana",
+    "payment-protocol",
+    "middleware",
+    "express",
+    "fastify"
+  ],
+  "dependencies": {
+    "@solana/web3.js": "^1.95.8",
+    "@solana/spl-token": "^0.4.9",
+    "bs58": "^6.0.0",
+    "tweetnacl": "^1.0.3",
+    "zod": "^3.24.1",
+    "axios": "^1.7.9",
+    "ioredis": "^5.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "fastify": "^5.2.0",
+    "express": "^4.21.2",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
+    "eslint": "^9.17.0"
+  }
+}

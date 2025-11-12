@@ -1,0 +1,30 @@
+{
+  "name": "@x402-upl/eliza-plugin",
+  "version": "1.0.0",
+  "description": "Eliza plugin for x402 autonomous agent marketplace with on-chain reputation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest"
+  },
+  "keywords": ["eliza", "x402", "ai-agent", "marketplace", "solana"],
+  "peerDependencies": {
+    "@ai16z/eliza": "^0.1.0"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.8",
+    "@x402-upl/core": "workspace:*",
+    "@x402-upl/sdk": "workspace:*",
+    "@noble/ed25519": "^2.1.0",
+    "zod": "^3.22.4",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

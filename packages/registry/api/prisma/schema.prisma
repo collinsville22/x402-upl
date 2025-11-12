@@ -1,0 +1,434 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model Agent {
+  id                    String   @id @default(cuid())
+  walletAddress         String   @unique
+  did                   String?
+  visaTapCert           String?
+  reputationScore       Int      @default(5000)
+  totalSpent            Decimal  @default(0) @db.Decimal(20, 6)
+  totalTransactions     Int      @default(0)
+  successfulTransactions Int     @default(0)
+  stakedSol             Decimal  @default(0) @db.Decimal(20, 9)
+  stakeLockUntil        DateTime?
+  disputesFiled         Int      @default(0)
+  disputesWon           Int      @default(0)
+  disputesLost          Int      @default(0)
+  slashedAmount         Decimal  @default(0) @db.Decimal(20, 9)
+  creditLimit           Decimal  @default(0) @db.Decimal(20, 6)
+  creditUsed            Decimal  @default(0) @db.Decimal(20, 6)
+  status                AgentStatus @default(ACTIVE)
+  metadataUri           String?
+  createdAt             DateTime @default(now())
+  lastActive            DateTime @updatedAt
+
+  transactions          Transaction[]
+  ratings               Rating[]
+  disputes              Dispute[] @relation("AgentDisputes")
+  providedServices      Service[]
+
+  @@index([walletAddress])
+  @@index([reputationScore])
+  @@index([status])
+}
+
+model Service {
+  id                    String   @id @default(cuid())
+  onChainId             String?  @unique
+  url                   String   @unique
+  proxyUrl              String?  @unique
+  name                  String
+  description           String
+  category              String
+  ownerWalletAddress    String
+  pricePerCall          Decimal  @db.Decimal(10, 6)
+  pricingModel          PricingModel @default(FLAT)
+  acceptedTokens        String[]
+  openapiSchemaUri      String?
+  inputSchema           String?  @db.Text
+  outputSchema          String?  @db.Text
+  capabilities          String[]
+  tags                  String[]
+  totalCalls            Int      @default(0)
+  successfulCalls       Int      @default(0)
+  totalRevenue          Decimal  @default(0) @db.Decimal(20, 6)
+  averageResponseTimeMs Int      @default(0)
+  uptimePercentage      Int      @default(100)
+  reputationScore       Int      @default(0)
+  totalRatings          Int      @default(0)
+  averageRating         Decimal  @default(0) @db.Decimal(3, 2)
+  verified              Boolean  @default(false)
+  visaTapVerified       Boolean  @default(false)
+  status                ServiceStatus @default(ACTIVE)
+  createdAt             DateTime @default(now())
+  lastUpdated           DateTime @updatedAt
+
+  owner                 Agent    @relation(fields: [ownerWalletAddress], references: [walletAddress])
+  transactions          Transaction[]
+  ratings               Rating[]
+  metrics               ServiceMetrics[]
+
+  @@index([category])
+  @@index([pricePerCall])
+  @@index([reputationScore])
+  @@index([status])
+  @@index([ownerWalletAddress])
+}
+
+model Transaction {
+  id                    String   @id @default(cuid())
+  agentId               String
+  serviceId             String
+  amountUsdc            Decimal  @db.Decimal(10, 6)
+  token                 String
+  signature             String   @unique
+  status                TransactionStatus @default(PENDING)
+  responseTimeMs        Int?
+  errorMessage          String?
+  blockHash             String?
+  slot                  BigInt?
+  paymentProof          String?  @db.Text
+  receiptUri            String?
+  createdAt             DateTime @default(now())
+  confirmedAt           DateTime?
+
+  agent                 Agent    @relation(fields: [agentId], references: [id])
+  service               Service  @relation(fields: [serviceId], references: [id])
+  rating                Rating?
+
+  @@index([agentId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([signature])
+}
+
+model Rating {
+  id                    String   @id @default(cuid())
+  transactionId         String   @unique
+  agentId               String
+  serviceId             String
+  rating                Int
+  comment               String?  @db.Text
+  verifiedPurchase      Boolean  @default(true)
+  createdAt             DateTime @default(now())
+
+  transaction           Transaction @relation(fields: [transactionId], references: [id])
+  agent                 Agent    @relation(fields: [agentId], references: [id])
+  service               Service  @relation(fields: [serviceId], references: [id])
+
+  @@index([serviceId])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+model Dispute {
+  id                    String   @id @default(cuid())
+  agentId               String
+  serviceId             String?
+  type                  DisputeType
+  status                DisputeStatus @default(OPEN)
+  description           String   @db.Text
+  evidenceUri           String?
+  resolution            String?  @db.Text
+  slashAmount           Decimal? @db.Decimal(20, 9)
+  createdAt             DateTime @default(now())
+  resolvedAt            DateTime?
+
+  agent                 Agent    @relation("AgentDisputes", fields: [agentId], references: [id])
+
+  @@index([agentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ServiceMetrics {
+  id                    String   @id @default(cuid())
+  serviceId             String
+  timestamp             DateTime @default(now())
+  totalCalls            Int
+  successfulCalls       Int
+  failedCalls           Int
+  averageResponseTimeMs Int
+  p95ResponseTimeMs     Int
+  p99ResponseTimeMs     Int
+  uptimePercentage      Decimal  @db.Decimal(5, 2)
+  revenue               Decimal  @db.Decimal(20, 6)
+  uniqueAgents          Int
+
+  service               Service  @relation(fields: [serviceId], references: [id])
+
+  @@index([serviceId, timestamp])
+}
+
+model Wallet {
+  id                    String   @id @default(cuid())
+  address               String   @unique
+  type                  WalletType
+  agentId               String?  @unique
+  cdpWalletId           String?
+  policies              String?  @db.Text
+  createdAt             DateTime @default(now())
+  lastUsed              DateTime @updatedAt
+
+  @@index([address])
+  @@index([type])
+}
+
+enum AgentStatus {
+  ACTIVE
+  PAUSED
+  SUSPENDED
+  BANNED
+}
+
+enum ServiceStatus {
+  ACTIVE
+  PAUSED
+  DEPRECATED
+  SUSPENDED
+}
+
+enum PricingModel {
+  FLAT
+  TIERED
+  DYNAMIC
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMING
+  CONFIRMED
+  FAILED
+  REVERSED
+}
+
+enum DisputeType {
+  FRAUD
+  SERVICE_FAILURE
+  OVERCHARGE
+  QUALITY_ISSUE
+  OTHER
+}
+
+enum DisputeStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  REJECTED
+}
+
+enum WalletType {
+  CDP_EMBEDDED
+  PHANTOM
+  EXTERNAL
+}
+
+model GovernanceProposal {
+  id                    String   @id @default(cuid())
+  proposerId            String
+  type                  ProposalType
+  title                 String
+  description           String   @db.Text
+  disputeId             String?
+  targetAgentId         String?
+  targetServiceId       String?
+  proposedAction        String
+  votingStartAt         DateTime
+  votingEndAt           DateTime
+  quorumRequired        Int
+  totalVotes            Int      @default(0)
+  votesFor              Int      @default(0)
+  votesAgainst          Int      @default(0)
+  votesAbstain          Int      @default(0)
+  status                ProposalStatus @default(ACTIVE)
+  executedAt            DateTime?
+  executionTxSignature  String?
+  createdAt             DateTime @default(now())
+
+  votes                 Vote[]
+
+  @@index([status])
+  @@index([votingEndAt])
+  @@index([proposerId])
+}
+
+model Vote {
+  id                    String   @id @default(cuid())
+  proposalId            String
+  voterId               String
+  voteType              VoteType
+  votingPower           Int
+  reason                String?  @db.Text
+  signature             String
+  createdAt             DateTime @default(now())
+
+  proposal              GovernanceProposal @relation(fields: [proposalId], references: [id])
+
+  @@unique([proposalId, voterId])
+  @@index([proposalId])
+  @@index([voterId])
+}
+
+model Arbitration {
+  id                    String   @id @default(cuid())
+  disputeId             String   @unique
+  arbitratorId          String
+  status                ArbitrationStatus @default(ASSIGNED)
+  evidenceReviewed      Boolean  @default(false)
+  hearingScheduled      DateTime?
+  hearingCompleted      DateTime?
+  ruling                String?  @db.Text
+  compensation          Decimal? @db.Decimal(20, 9)
+  slashRecommendation   Decimal? @db.Decimal(20, 9)
+  assignedAt            DateTime @default(now())
+  completedAt           DateTime?
+
+  @@index([disputeId])
+  @@index([arbitratorId])
+  @@index([status])
+}
+
+model ServiceVerification {
+  id                    String   @id @default(cuid())
+  serviceId             String
+  verificationType      VerificationType
+  status                VerificationStatus @default(PENDING)
+  automatedChecks       String   @db.Text
+  securityScan          String?  @db.Text
+  performanceTest       String?  @db.Text
+  complianceCheck       String?  @db.Text
+  manualReview          String?  @db.Text
+  verifiedBy            String?
+  verifiedAt            DateTime?
+  expiresAt             DateTime?
+  certificateUri        String?
+  createdAt             DateTime @default(now())
+
+  @@index([serviceId])
+  @@index([status])
+  @@index([verificationType])
+}
+
+model ZKCredential {
+  id                    String   @id @default(cuid())
+  agentId               String
+  credentialType        CredentialType
+  schemaId              String
+  commitment            String
+  nullifier             String   @unique
+  proofUri              String
+  issuedBy              String
+  isRevoked             Boolean  @default(false)
+  revokedAt             DateTime?
+  expiresAt             DateTime?
+  createdAt             DateTime @default(now())
+
+  @@index([agentId])
+  @@index([credentialType])
+  @@index([nullifier])
+  @@index([isRevoked])
+}
+
+model MultiSigWallet {
+  id                    String   @id @default(cuid())
+  address               String   @unique
+  threshold             Int
+  signers               String[]
+  agentIds              String[]
+  pendingTransactions   Int      @default(0)
+  totalTransactions     Int      @default(0)
+  createdAt             DateTime @default(now())
+
+  transactions          MultiSigTransaction[]
+
+  @@index([address])
+}
+
+model MultiSigTransaction {
+  id                    String   @id @default(cuid())
+  walletId              String
+  transactionData       String   @db.Text
+  signatures            String[] @default([])
+  signaturesRequired    Int
+  status                MultiSigTxStatus @default(PENDING)
+  executedAt            DateTime?
+  txSignature           String?
+  createdAt             DateTime @default(now())
+
+  wallet                MultiSigWallet @relation(fields: [walletId], references: [id])
+
+  @@index([walletId])
+  @@index([status])
+}
+
+enum ProposalType {
+  DISPUTE_RESOLUTION
+  AGENT_SUSPENSION
+  SERVICE_SUSPENSION
+  PARAMETER_CHANGE
+  TREASURY_ALLOCATION
+  OTHER
+}
+
+enum ProposalStatus {
+  ACTIVE
+  PASSED
+  REJECTED
+  EXECUTED
+  EXPIRED
+}
+
+enum VoteType {
+  FOR
+  AGAINST
+  ABSTAIN
+}
+
+enum ArbitrationStatus {
+  ASSIGNED
+  INVESTIGATING
+  HEARING_SCHEDULED
+  COMPLETED
+  APPEALED
+}
+
+enum VerificationType {
+  SECURITY_AUDIT
+  PERFORMANCE_TEST
+  COMPLIANCE_CHECK
+  MANUAL_REVIEW
+  VISA_TAP
+}
+
+enum VerificationStatus {
+  PENDING
+  IN_PROGRESS
+  PASSED
+  FAILED
+  EXPIRED
+}
+
+enum CredentialType {
+  REPUTATION_PROOF
+  TRANSACTION_HISTORY
+  IDENTITY_VERIFICATION
+  SERVICE_COMPLETION
+  DISPUTE_RESOLUTION
+}
+
+enum MultiSigTxStatus {
+  PENDING
+  PARTIALLY_SIGNED
+  READY
+  EXECUTED
+  CANCELLED
+}
