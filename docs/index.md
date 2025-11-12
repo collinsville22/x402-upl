@@ -4,9 +4,24 @@ Welcome to the X402-UPL documentation. This is a complete Solana-based payment i
 
 ## Quick Links
 
+### Getting Started
+- [Getting Started Guide](guides/getting-started) - Complete step-by-step tutorial
+- [Core Concepts](guides/concepts) - Deep dive into platform concepts
+- [Best Practices](guides/best-practices) - Production tips and optimization
+
+### Technical Documentation
 - [Architecture Overview](architecture) - System design and technical architecture
 - [Setup Guide](setup) - Installation and configuration instructions
+- [Facilitator Component](components/facilitator) - Core payment component
+
+### API & SDK Reference
+- [Facilitator API Reference](api-reference/facilitator-api) - Complete REST API documentation
+- [JavaScript/TypeScript SDK](sdks/javascript) - Full SDK guide with examples
+
+### Support
+- [Troubleshooting](troubleshooting/common-issues) - Common issues and solutions
 - [GitHub Repository](https://github.com/collinsville22/x402-upl)
+- [GitHub Issues](https://github.com/collinsville22/x402-upl/issues)
 
 ## What is X402-UPL?
 
