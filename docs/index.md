@@ -14,6 +14,9 @@ Welcome to the X402-UPL documentation. This is a complete Solana-based payment i
 - [Setup Guide](setup) - Installation and configuration instructions
 - [X042 Core Middleware](core/x042-middleware) - Multi-framework payment middleware
 - [CLI Tool](core/cli) - Command-line interface reference
+- [MCP Bridge](core/mcp-bridge) - Claude Desktop integration
+- [Service Provider Guide](core/service-provider) - Building x402 services
+- [Reasoning Engine](core/reasoning-engine) - AI task orchestration
 
 ### Integrations
 - [CDP Agent](integrations/cdp-agent) - Coinbase CDP autonomous agents
@@ -47,7 +50,13 @@ X402-UPL is a production-ready payment layer implementing the HTTP 402 Payment R
 
 ## Documentation Complete
 
-This documentation covers all major components of the X402-UPL platform with comprehensive guides, examples, and API references totaling over 600KB of professional technical documentation.
+This documentation covers all major components of the X402-UPL platform with comprehensive guides, examples, and API references totaling over 610KB of professional technical documentation.
+
+**What's Documented:**
+- ✅ All 6 sponsor integrations (392KB)
+- ✅ Complete core middleware & tools (128KB)
+- ✅ Foundation guides & API references (170KB+)
+- ✅ 20+ comprehensive technical documents
 
 ## License
 
